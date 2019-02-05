@@ -1,0 +1,105 @@
+---
+title: "Homework 1"
+author: "Mary Anna Kivenson"
+date: "2/2/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1.8 Smoking Habits of UK Residents
+a) Each row of the data matrix represents a unique case; in this example, each case is a UK resident that participated in the smoking survey.
+
+b) 1691 participants were included in the survey.
+
+c)  Sex: Nominal Categorical / 
+    Age: Discrete Numerical / 
+    Marital: Nominal Categorical / 
+    grossIncome: Ordinal Categorical / 
+    smoke: Nominal Categorical / 
+    amtWeekends: Ordinal Categorical / 
+    amtWeekdays: Ordinal Categorical
+  
+## Question 1.10 Cheaters, Scope of Inference
+a) The population of interest is male and female children between the ages of 5 and 15.
+
+b) The results of the study may be generalized to the population, if the children in the study were selected randomly. The findings from this study show that these is a correlation between student characteristics and honestly, but this does not imply causation. Causual relationships can be determined through a randomized experient. If this experiment was randomized, there is a possibility of causual relationships in the findings of the study.
+
+## Question 1.28 Reading the Paper
+a) Although the study produces a significant correlation between smoking and dementia, it may not be possible to conclude that smoking causes dementia later in life. There may be a confounding variable present - for example, smoking may cause other medical issues that contribute to dementia, such as strokes or vascular issues. More details about how the experiment was carried out are needed.
+
+b) This statement is not accurate - a better conclusion that could be drawn from the study is that students who have sleep disorders may be suffering from a lack of sleep, which may lead to behavioral issues such as bullying. However, not all students with sleep disorders become bullies and not all bullies have sleep disorders.
+
+## Question 1.36 Exercise and Mental Health
+a) This is a randomized experiment.
+
+b) The group that exercises is the treatment group; the group that rests is the control group.
+
+c) The blocking variable in this study is age.
+
+d) There is no blinding in this study - the subjects will know whether they are exercising or not.
+
+e) Conducting a randomized experiement with minimized bias should be sufficient in establishing a causal relationship between exercise and mental health. However, the conclusions could only be applied to people between the age of 18 and 55.
+
+f) My reservations would be variations in the amount and rigor of exercise (which is not specified). Also, the method of measuring mental health should be clarified, as measurements may be difficult to quantify and subject to bias.
+
+## Question 1.48 Stats Scores
+Box plot below. 
+```{r stats.scores, include=FALSE}
+library(openintro)
+summary(stats.scores)
+```
+
+```{r stats.scores plot}
+boxplot(stats.scores, main="Statistics Score Distribution", ylab = "Scores")
+```
+
+## Question 1.50 Mix-and-Match
+a) 2
+b) 3
+c) 1
+
+## Question 1.56 Distribution and Appropriate Statistics
+a) The distribution of housing prices are **right skewed**, because there is a meaniningful number of houses that cost more than six million dollars (but most of the houses are below one million dollars). 
+The **median** would best represent a typical observation in the data, since it would not be affected by the significantly more expensive homes. 
+Similarly, **interquartile range** would reflect the variability of observations accurately since it would not allow six million dollar homes to magnify the variance.
+In general, median and interquartile range is best when the distribution is not symmetric. 
+
+b) The distribution of housing prices is **symmetrical** since most homes are below 1.2 million dollars (few outliers) with the median price being $600,000.
+Since the distribution of prices is symmetrical, **mean** and **standard deviation** can be used to accurately reflect typical price and variation.
+
+c) The distribution of alcoholic drinks consumed by college students would be **right-skewed**, because most students do not drink and a few drink excessively (the few that drink excessively create a right tail). Because the distribution is skewed, **median** and **interquartile range** should be used - otherwise the mean would probably overestimate the typical amount of drinking and the standard deviation would show significant variance due to the difference between the mean and the students that do not drink or drink excessively.
+
+d) The distribution of salaries are **symmetrcal**, because only a few executives make more than the typical employee and can be considered outliers.
+The **median** would best represent a typical observation in the data, since it would not be affected by the few but significantly higher salaries. 
+Similarly, **interquartile range** would reflect the variability of observations accurately since it would not allow outliers to skew the variance.
+
+## Question 1.70 Heart Transplates
+a) Survival is not independent of whether or not the patient got a transplant - patients who got a transplant surived more frequently than patients that did not.
+
+b) The box plots show that the heart transplant treatment is much better than no transplant at all (since the majority of patients without treatment died within days). However, overall the treatment seems to only increase lifespan by less than two years for most patients.
+
+c) Treatment group: .652; Control group: 0.882
+```{r transplants}
+table(heartTr$survived,heartTr$transplant)
+prop.table(table(heartTr$survived,heartTr$transplant),2)
+```
+
+d) 
+i. The claims being tested is whether the treatment increased survival of gravely ill patients that could benefit from a new heart.
+H_0: The treatment does not increase survival of ill patients.
+H_1: The treatment increases the survival of ill patients.
+  ii. We write alive on **28** cards representing patients who were alive at
+the end of the study, and dead on **75** cards representing patients
+who were not. Then, we shuffle these cards and split them into two groups:
+one group of size **69** representing treatment, and another group of
+size **34** representing control. We calculate the difference between
+the proportion of dead cards in the treatment and control groups (treatment -
+control) and record this value. We repeat this 100 times to build a distribution
+centered at **0**. Lastly, we calculate the fraction of simulations where
+the simulated differences in proportions are at least **0.23**. If this fraction is low,
+we conclude that it is unlikely to have observed such an outcome by chance and
+that the null hypothesis should be rejected in favor of the alternative.
+ iii. These simulation results show a very low occurance of proportion differences that are 0.23 or above. This shows that the null hypothesis (that the treatment does not increase survival of patients) can be rejected.
