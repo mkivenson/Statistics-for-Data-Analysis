@@ -200,7 +200,7 @@ chip that says "head"" is 20%, and "tail" is 80%.
 3.  In your simulation of flipping the unfair coin 100 times, how many flips 
     came up heads?
     
-    ** 21 coins came up heads in my simulation **
+  **21 coins came up heads in my simulation.**
     
 ```{r table-sim_unfair_coin, eval=TRUE}
 sim_unfair_coin
