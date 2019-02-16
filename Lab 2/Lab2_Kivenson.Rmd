@@ -268,7 +268,7 @@ a hot hand.
 
 Using `calc_streak`, compute the streak lengths of `sim_basket`.
 
-```{r calc-streak-sim, eval=TRUE}
+```{r calc-streak-sim, eval=FALSE}
 sim_streak <- calc_streak(sim_basket)
 barplot(table(sim_streak))
 ```
