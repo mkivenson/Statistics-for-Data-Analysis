@@ -1,11 +1,11 @@
 ---
 title: "The normal distribution"
 output:
-  pdf_document: default
   html_document:
     css: ./lab.css
     highlight: pygments
     theme: cerulean
+  pdf_document: default
 ---
 
 In this lab we'll investigate the probability distribution that is most central
