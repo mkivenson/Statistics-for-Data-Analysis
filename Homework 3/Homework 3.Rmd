@@ -5,7 +5,7 @@ date: "2/18/2019"
 output:
   html_document:
     highlight: pygments
-    theme: cerulean
+    theme: united
   pdf_document: default
 ---
 
@@ -263,6 +263,7 @@ If we wanted to calculate the probability that a couple who plans to have 8 kids
 3 boys, briefly describe why the approach from part (b) would be more tedious than the
 approach from part (a).
 The approach from part b would have us calculate and sum up the probability of $${{8}\choose{3}} = 56 $$ disjoint events, rather than just using one formula to calculate the probability.
+
 ##
 
 ## 3.42 Serving in volleyball.  {.tabset .tabset-fade}
