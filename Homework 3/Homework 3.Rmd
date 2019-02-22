@@ -159,6 +159,9 @@ qqline(fheights$heights)
 ```
 
 ### Part A
+The mean height is 61.52 inches with a standard deviation of 4.58 inches. Use this information
+to determine if the heights approximately follow the 68-95-99.7% Rule.  
+
 The mean height distribution approximately follows the 68-95-99.7% rule (within a few percentage points - this distribution is actually 64%-92%-96%).
 ```{r 18a}
 ## Within one standard deviation
@@ -172,6 +175,9 @@ sum(fheights$heights < (61.52 + 4.58) & fheights$heights > (61.52 - 4.58)) / 25
 ```
 
 ### Part B
+Do these data appear to follow a normal distribution? Explain your reasoning using the graphs
+provided below.  
+
 These data appear to follow a normal distribution because:  
 *the distribution plot is somewhat consistent with a normal curve
 *The q-q plot for this distribution is close to the q-q line. 
