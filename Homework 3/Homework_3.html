@@ -341,7 +341,8 @@ y &lt;-<span class="st"> </span><span class="kw">dnorm</span>(<span class="dt">x
 </div>
 <div id="part-a-2" class="section level3">
 <h3>Part A</h3>
-<p>The mean height distribution approximately follows the 68-95-99.7% rule (within a few percentage points - this distribution is actually 64%-92%-96%).</p>
+<p>The mean height is 61.52 inches with a standard deviation of 4.58 inches. Use this information to determine if the heights approximately follow the 68-95-99.7% Rule.<br />
+The mean height distribution approximately follows the 68-95-99.7% rule (within a few percentage points - this distribution is actually 64%-92%-96%).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Within one standard deviation
 <span class="kw">sum</span>(fheights<span class="op">$</span>heights <span class="op">&lt;</span><span class="st"> </span>(<span class="fl">61.52</span> <span class="op">+</span><span class="st"> </span><span class="fl">4.58</span>) <span class="op">&amp;</span><span class="st"> </span>fheights<span class="op">$</span>heights <span class="op">&gt;</span><span class="st"> </span>(<span class="fl">61.52</span> <span class="op">-</span><span class="st"> </span><span class="fl">4.58</span>)) <span class="op">/</span><span class="st"> </span><span class="dv">25</span></code></pre></div>
 <pre><code>## [1] 0.64</code></pre>
@@ -354,8 +355,8 @@ y &lt;-<span class="st"> </span><span class="kw">dnorm</span>(<span class="dt">x
 </div>
 <div id="part-b-2" class="section level3">
 <h3>Part B</h3>
-<p>These data appear to follow a normal distribution because:<br />
-<em>the distribution plot is somewhat consistent with a normal curve </em>The q-q plot for this distribution is close to the q-q line. *The values are distributed between standard deviations with similar proportions as a normal distribution.</p>
+<p>Do these data appear to follow a normal distribution? Explain your reasoning using the graphs provided below.<br />
+These data appear to follow a normal distribution because the distribution plot is somewhat consistent with a normal curve, the q-q plot for this distribution is close to the q-q line, and the values are distributed between standard deviations with similar proportions as a normal distribution.</p>
 </div>
 </div>
 <div id="section-2" class="section level2">
