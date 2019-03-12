@@ -12,6 +12,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(openintro)
+library(ggplot2)
+
 ```
 
 Assignment: 4.4, 4.14, 4.24, 4.26, 4.34, 4.40, 4.48
@@ -26,22 +28,32 @@ active individuals. The histogram below shows the sample distribution of heights
 What is the point estimate for the average height of active individuals? What about the
 median? (See the next page for parts (b)-(e).)
 
+The point estimate for the average height of active individuals is 171.1 and the median is 170.3
 
 ### Part B  
 What is the point estimate for the standard deviation of the heights of active individuals?
 What about the IQR?
 
+The point estimate for the standard deviation of heights is 9.4 and the IQR is 177.8 - 163.8 = 14.
 
 ### Part C  
 Is a person who is 1m 80cm (180 cm) tall considered unusually tall? And is a person who is
 1m 55cm (155cm) considered unusually short? Explain your reasoning.
 
+About 95% of observations fall within two standard deviations of the mean. 
+```{r 4c}
+low = 171.1 - (2*9.4)
+high = 171.1 + (2*9.4)
+print(paste0("(",low,", ",high," )"))
+```
+180cm falls within two standard deviations, and so does 155cm. Both values are within two standard deviations so neither values are that unusual. 
 
 ### Part D
 The researchers take another random sample of physically active individuals. Would you
 expect the mean and the standard deviation of this new sample to be the ones given above?
 Explain your reasoning.
 
+I would expect the mean and standard deviation of this new sample to be different from the ones given above, since the distribution of a different samples of heights will not be identical. 
 
 ### Part E
 The sample means obtained are point estimates for the mean height of all active individuals,
@@ -50,6 +62,12 @@ use to quantify the variability of such an estimate (Hint: recall that $SD_\bar{
 Compute this quantity using the data from the original sample under the condition that the data are a
 simple random sample.
 
+$SD_\bar{x} = 0.4174687$
+
+```{r 4e}
+SD = 9.4 / sqrt(507)
+SD
+```
 
 ##
 
@@ -67,28 +85,41 @@ Determine whether the following statements are true or false, and explain your r
 We are 95% confident that the average spending of these 436 American adults is between
 \$80.31 and $89.11.
 
+False - The average spending of these 436 adults is known to be $84.71.
+
 ### Part B  
 This confidence interval is not valid since the distribution of spending in the sample is right
 skewed.
 
+False - all conditions are met to use a normal model (random sample, independent sample values, sample size is sufficient)
+
 ### Part C  
 95% of random samples have a sample mean between \$80.31 and $89.11.
+
+False, we are 95% confident that the population mean is in this confidence interval. 
 
 ### Part D 
 We are 95% confident that the average spending of all American adults is between \$80.31 and
 $89.11.
 
+True, average spending of all American adults = population mean. We are 95% confident that the population mean is in this confidence interval. 
+
 ### Part E  
 A 90% confidence interval would be narrower than the 95% confidence interval since we don’t
 need to be as sure about our estimate.
+
+False - the interval would be narrower but this just means the population mean is 90% likely to be captured by the interval.
 
 ### Part F  
 In order to decrease the margin of error of a 95% confidence interval to a third of what it is
 now, we would need to use a sample 3 times larger.
 
+False, it would have to be 9 times larger because the square root of sample size is taken to calculate standard error. 
+
 ### Part G  
 The margin of error is 4.4.
 
+True, margin of error  = 84.71 - 80.31 = 4.4
 
 ##
 
@@ -102,21 +133,63 @@ some sample statistics.
 ### Part A
 Are conditions for inference satisfied?
 
+We must check that a normal model can be used. This is a random sample with less than 10% of the population, with size >30 and children are independent of each other. Therefore, conditions for inference are satisfied. 
+
 ### Part B
 Suppose you read online that children first count to 10 successfully when they are 32 months
 old, on average. Perform a hypothesis test to evaluate if these data provide convincing evidence
 that the average age at which gifted children fist count to 10 successfully is less than the general
 average of 32 months. Use a significance level of 0.10.
 
+Null Hypothesis: The average age at which gifted children fist count to 10 successfully is equal to the general
+average of 32 months.  
+Alternative Hypothesis: The average age at which gifted children fist count to 10 successfully is less than the general
+average of 32 months.
+
+$H_0: \mu = 32$
+$H_A: \mu < 32$  
+
+```{r 24b}
+#Parameters
+pop_mean = 32
+samp_mean = 30.69
+samp_sd = 4.31
+samp_size = 36
+
+#Z-Score
+zscore <- round((samp_mean - pop_mean)/(samp_sd/sqrt(samp_size)),digits=2)
+print(paste0("The z-score is ", zscore))
+
+#P-value
+pvalue <- round(pnorm(-abs(zscore)), digits = 4)
+print(paste0("The p-value is ", pvalue))
+```
+Since $p = 0.0344 < \alpha = 0.10$, we reject the null hypothesis. There is enough evidence to suggest that the average age at which gifted children fist count to 10 successfully is less than the general average of 32 months.
+
+
 ### Part C
 Interpret the p-value in context of the hypothesis test and the data.
+
+The p-value is the probability of the average age at which children fist count to 10 successfully being 30.69 months or less (assuming the null hypothesis is true). 
 
 ### Part D
 Calculate a 90% confidence interval for the average age at which gifted children first count to
 10 successfully.
 
+```{r 24d}
+SE = samp_sd / sqrt(samp_size)
+conf = .90
+z = qnorm(1- (1 - conf)/2)
+high = samp_mean + (z * SE)
+low = samp_mean - (z * SE)
+print(paste0("(",low,", ",high," )"))
+```
+
 ### Part E
 Do your results from the hypothesis test and the confidence interval agree? Explain.
+
+My results from the hypothesis test and the confidence interval agree. The general average of 32 months is above the upper bound of the confidence interval. Confidence invtervals and hypothesis tests always agree about statisticsal significance because both measures define a distance between the population and sample mean. 
+
 
 ##
 
@@ -127,17 +200,55 @@ Perform a hypothesis test to evaluate if these data provide convincing evidence 
 IQ of mothers of gifted children is different than the average IQ for the population at large,
 which is 100. Use a significance level of 0.10.
 
+Null Hypothesis: The average IQ of mothers of gifted children is the same as the average IQ for the population at large.
+Alternative Hypothesis: The average IQ of mothers of gifted children is different than the average IQ for the population at large.
+
+$H_0: \mu = 100$
+$H_A: \mu != 100$  
+
+```{r 26a}
+#Parameters
+pop_mean = 100
+samp_mean = 118.2
+samp_sd = 6.5
+samp_size = 36
+
+#Z-Score
+zscore <- round((samp_mean - pop_mean)/(samp_sd/sqrt(samp_size)),digits=2)
+print(paste0("The z-score is ", zscore))
+
+#P-value
+pvalue <- round(2*pnorm(-abs(zscore)), digits = 4)
+print(paste0("The p-value is ", pvalue))
+```
+The p-value of 0 is less than the significance level of 0.10, so we reject the null hypothesis.
+
 ### Part B
 Calculate a 90% confidence interval for the average IQ of mothers of gifted children.
 
+```{r 26b}
+SE = samp_sd / sqrt(samp_size)
+conf = .90
+z = qnorm(1- (1 - conf)/2)
+high = samp_mean + (z * SE)
+low = samp_mean - (z * SE)
+print(paste0("(",low,", ",high," )"))
+```
+
+The population average IQ of 100 is far outside the 90% confidence interval for the average IQ of mothers of gifted children, so we reject the null hypothesis.
+
 ### Part C
 Do your results from the hypothesis test and the confidence interval agree? Explain.
+
+My results from the hypothesis test and the confidence interval agree. The average IQ of mothers of gifted children is different than the average IQ for the population at large. Confidence invtervals and hypothesis tests always agree about statisticsal significance because both measures define a distance between the population and sample mean. 
 
 ##
 
 ##4.34 CLT.  {.tabset .tabset-fade}  
 Define the term “sampling distribution” of the mean, and describe how the shape,
 center, and spread of the sampling distribution of the mean change as sample size increases.
+
+The sampling distribution represents the distribution of sample means of a fixed size from a certain population. The shape of the distribution becomes normal; the center should approach the true population mean, and the spread should decrease as the sample size increases.
 
 ##
 
@@ -149,19 +260,70 @@ deviation of 1,000 hours.
 ### Part A
 What is the probability that a randomly chosen light bulb lasts more than 10,500 hours?
 
+The probability that a randomly chosen light bulb lasts more than 10,500 hours is 0.0668.
+
+```{r 40a}
+#Parameters
+pop_mean = 9000
+pop_sd = 1000
+samp_mean = 10500
+
+#Z-Score
+zscore <- round((samp_mean - pop_mean)/(pop_sd),digits=2)
+print(paste0("The z-score is ", zscore))
+
+#P-value
+pvalue <- round(pnorm(-abs(zscore)), digits = 4)
+print(paste0("The p-value is ", pvalue))
+```
+
 ### Part B
 Describe the distribution of the mean lifespan of 15 light bulbs.
+
+The distribution of the mean lifespan of 15 light bulbs will be normal and centered around 9,000 hours with SE = $\frac{1000}{\sqrt{15}}$. 
 
 ### Part C
 What is the probability that the mean lifespan of 15 randomly chosen light bulbs is more than
 10,500 hours?
 
+The probability that the mean lifespan of 15 randomly chosen light bulbs is more than 10,500 hours is 0. 
+
+```{r 40c}
+#Parameters
+pop_mean = 9000
+pop_sd = 1000
+samp_mean = 10500
+samp_size = 15
+
+#Z-Score
+zscore <- round((samp_mean - pop_mean)/(pop_sd/sqrt(samp_size)),digits=2)
+print(paste0("The z-score is ", zscore))
+
+#P-value
+pvalue <- round(pnorm(-abs(zscore)), digits = 4)
+print(paste0("The p-value is ", pvalue))
+```
+
 ### Part D
 Sketch the two distributions (population and sampling) on the same scale.
+
+```{r 40d}
+# Add a Normal Curve (Thanks to Peter Dalgaard)
+
+xfit<-seq(min(pop_mean - 3*pop_sd),max(pop_mean + 3*pop_sd),length=100) 
+
+#POPULATION
+plot(dnorm(xfit,mean=pop_mean, pop_sd), type = "l", col = "blue", ylim=c(0,0.0016), ylab = "")
+
+#SAMPLE
+lines(dnorm(xfit,mean=pop_mean,sd=pop_sd/sqrt(samp_size)), col = "red")
+```
 
 ### Part E
 Could you estimate the probabilities from parts (a) and (c) if the lifespans of light bulbs had
 a skewed distribution?  
+
+We cannot estimate the probabilities from parts a and c if the lifespans of light bulbs had a skewed distribution, since a normal distribution is required.
 
 ##
 
@@ -170,5 +332,7 @@ Suppose you conduct a hypothesis test based
 on a sample where the sample size is n = 50, and arrive at a p-value of 0.08. You then refer back
 to your notes and discover that you made a careless mistake, the sample size should have been
 n = 500. Will your p-value increase, decrease, or stay the same? Explain.  
+
+The p-value will decrease, since a higher sample size produces a smaller standard error. A smaller standard error makes |zscore| higher, and a larger z-score corresponds to a smaller probability value. 
 
 ##
