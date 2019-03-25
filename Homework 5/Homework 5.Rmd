@@ -1,0 +1,276 @@
+---
+title: "Homework 5"
+author: "Mary Anna Kivenson"
+date: "3/24/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(openintro)
+```
+
+Assignment: 5.6, 5.14, 5.20, 5.32, 5.48
+
+## 5.6 Working backwards, Part II
+ 
+A 90% confidence interval for a population mean is (65, 77). 
+The population distribution is approximately normal and the population standard deviation
+is unknown. This confidence interval is based on a simple random sample of 25 observations.
+Calculate the sample mean, the margin of error, and the sample standard deviation.  
+
+$ME = \bar{x} \pm t_{df}^{*}SE$  
+$\frac{77-65}{2} = 6 = t_{df}^{*}SE$  
+$df = n - 1 = 25 - 1 = 24$  
+$t_{24}^{*} = 1.711$  
+$SE = \frac{s}{\sqrt{n}} = \frac{ME}{t_{24}^{*}} = \frac{6}{1.711}$  
+$SE = 3.5067 = \frac{s}{\sqrt{25}}$  
+ 
+```{r 5.6a}
+conf_upp = 77
+conf_low = 65
+n = 25
+df = n -1
+conf = 0.9
+t_score = qt(conf + (1 - conf)/2,df)
+ME = (conf_upp - conf_low) / 2
+samp_mean =  conf_upp - ME
+SE = ME / t_score
+samp_sd = SE * sqrt(n)
+print(paste0("Sample Mean: ", samp_mean))
+print(paste0("Margin of Error: ", ME))
+print(paste0("Sample Standard Deviation: ", samp_sd))
+```
+
+
+
+## 5.14 SAT scores   {.tabset .tabset-fade}
+
+SAT scores of students at an Ivy League college are distributed with a
+standard deviation of 250 points. Two statistics students, Raina and Luke, want to estimate the
+average SAT score of students at this college as part of a class project. They want their margin of
+error to be no more than 25 points.
+
+### Part A  
+**Raina wants to use a 90% confidence interval. How large a sample should she collect?**
+
+```{r 5.14a}
+conf = 0.9
+z_score = qnorm(conf + (1 - conf)/2)
+ME = 25
+SE = ME / z_score
+samp_sd = 250
+n = (samp_sd/SE)^2
+print(paste0("Sample size: ", ceiling(n)))
+```
+
+### Part B
+**Luke wants to use a 99% confidence interval. Without calculating the actual sample size,
+determine whether his sample should be larger or smaller than Raina’s, and explain your
+reasoning.**
+
+Luke's sample size should be larger because a larger confidence increases the z-score, which decreases the standard error. When the standard error is low, the required sample size will increase. 
+
+### Part C
+**Calculate the minimum required sample size for Luke.**
+
+```{r 5.14c}
+conf = 0.99
+z_score = qnorm(conf + (1 - conf)/2)
+ME = 25
+SE = ME / z_score
+samp_sd = 250
+n = (samp_sd/SE)^2
+print(paste0("Sample size: ", ceiling(n)))
+```
+
+## 5.20 High School and Beyond, Part I {.tabset .tabset-fade}
+
+The National Center of Education Statistics conducted
+a survey of high school seniors, collecting test data on reading, writing, and several other subjects.
+Here we examine a simple random sample of 200 students from this survey. Side-by-side box plots
+of reading and writing scores as well as a histogram of the differences in scores are shown below.
+
+### Part A
+
+**Is there a clear difference in the average reading and writing scores?**
+
+Based on the box plots and histograms alone, there is a clear difference between average reading and writing scores. Writing scores seem to have a much heigher median according to the box plots. From the historgram, we can see that although the chart is centered at 0, many scores differ by ~10 points.
+
+### Part B
+
+**Are the reading and writing scores of each student independent of each other?**
+
+Reading and writings scores of each student are not independent of each other (if a student can read well, it is likely that they can write well also, and vise-versa). However, each student is independent of other students.
+
+### Part C
+
+**Create hypotheses appropriate for the following research question: is there an evident difference
+in the average scores of students in the reading and writing exam?**
+
+$H_0: \mu_{write} - \mu_{read} = 0$
+
+$H_A: \mu_{write} - \mu_{read} \neq 0$
+
+### Part D
+
+**Check the conditions required to complete this test.**
+
+*Random*: The students were selected randomly
+
+*Independent*: Students are independent of each other
+
+*Normal*: The sample size of each group is reasonably large (>30). Also, the sample size is less than 10% of the population.
+
+
+### Part E
+
+**The average observed difference in scores is $x_{read-write}$ = 0.545, and the standard deviation
+of the differences is 8.887 points. Do these data provide convincing evidence of a difference
+between the average scores on the two exams?**
+
+```{r 5.20e}
+xdiff = 0.545
+sdiff = 8.887
+n = 200
+SE = sdiff / sqrt(n)
+t = xdiff / SE
+df = n -1
+conf = 0.95
+t_val = qt(conf + (1 - conf)/2,df)
+
+print(paste0("t-score: ", t))
+print(paste0("t-crit: ", t_val))
+
+```
+
+Since the t- score of 0.867 is less than the critical t-value at a 95% confidence level, we fail to reject the null hypothesis. The data do not provide convincing evidence of a difference between the average scores on the two exams.
+
+
+### Part F
+
+What type of error might we have made? Explain what the error means in the context of the
+application.
+
+We may have made a type II error, which means we failed to reject the null hypothesis and the null hypothesis is false. In this context, it would mean that there is a difference between the average scores on the two exams but we failed to reject the null hypothesis stating that there is no difference between the average scores on the two exams.
+
+### Part G
+
+Based on the results of this hypothesis test, would you expect a confidence interval for the
+average difference between the reading and writing scores to include 0? Explain your reasoning.
+
+I would expect the confidence interval for the average difference between the reading and writing scores to include 0.
+If a confidence interval includes 0, it indicates that there are no statistically significant differences in means.
+
+## 5.32 Fuel efficiency of manual and automatic cars, Part I
+
+Each year the US Environmental Protection Agency (EPA) releases fuel economy data on cars manufactured in that year.
+Below are summary statistics on fuel eciency (in miles/gallon) from random samples of cars with
+manual and automatic transmissions manufactured in 2012. Do these data provide strong evidence
+of a difference between the average fuel efficiency of cars with manual and automatic transmissions
+in terms of their average city mileage? Assume that conditions for inference are satisfied.
+
+
+$H_0: \mu_{manual} - \mu_{auto} = 0$
+
+$H_A: \mu_{manual} - \mu_{auto} \neq 0$
+
+
+```{r 5.32}
+n = 26
+
+#Manual
+mean_m = 19.85
+sd_m = 4.51
+
+#Auto
+mean_a = 16.12
+sd_a = 3.58
+
+xdiff = mean_m - mean_a
+sdiff = sd_m - sd_a
+SE = sdiff / sqrt(n)
+t = xdiff / SE
+df = n -1
+conf = 0.95
+t_val = qt(conf + (1 - conf)/2,df)
+
+print(paste0("t-score: ", t))
+print(paste0("t-crit: ", t_val))
+```
+
+The t-score of 20.45 is much higher than the critical value of t* = 2.05, so we reject the null hypothesis. The data provide strong evidence of a difference between the average fuel efficiency of cars with manual and automatic transmissions.
+
+## 5.48 Work hours and education    {.tabset .tabset-fade}
+
+The General Social Survey collects data on demographics,
+education, and work, among many other characteristics of US residents. Using ANOVA, we can
+consider educational attainment levels for all 1,172 respondents at once. Below are the distributions
+of hours worked by educational attainment and relevant summary statistics that will be helpful in
+carrying out this analysis.
+
+### Part A
+
+**Write hypotheses for evaluating whether the average number of hours worked varies across the
+five groups.**
+
+$H_0$: The average number of hours worked does not vary by educational attainment.  $\mu_{lessHS} = \mu_{HS} = \mu_{JrColl}= \mu_{Bachelor}= \mu_{Graduate}$ 
+
+$H_A$: The average number of hours worked varies by educational attainment for at least one group.
+
+### Part B
+
+**Check conditions and describe any assumptions you must make to proceed with the test.**
+
+Observations are independent within and across groups: US residents are independent of each other and groups of educational attainment are also independent
+
+Data within each group is nearly normal: Sample size for each group is large enough that the hours worked follows a normal distribution
+
+Variability across groups is about equal: IQR for each group is the same (about 40 hours).
+
+### Part C
+
+**Below is part of the output associated with this test. Fill in the empty cells.**
+
+I calculated all the fields manually using the group means, standard deviations, and sample sizes. My calculations were similar to the textbook's provided values, but slightly off (probably due to rounding).
+
+```{r 5.48c}
+mean <- c(38.67, 39.6, 41.39, 42.55, 40.85)
+sd <- c(15.81,14.97, 18.1, 13.62, 15.51)
+n <- c(121, 546, 97, 253, 155)
+groups = length(n)
+
+df_degree = groups - 1
+df_resid = sum(n) - groups
+df_total = df_degree + df_resid
+
+sum_sq_degree = sum(n*(mean - mean(mean))^2)
+sum_sq_resid = sum((n-1)*(sd^2))
+sum_sq_total = sum_sq_degree + sum_sq_resid
+
+mean_sq_degree = sum_sq_degree / df_degree
+mean_sq_resid = sum_sq_resid / df_resid
+
+f_value_degree = mean_sq_degree/ mean_sq_resid
+f_pr_value = pf(q=f_value_degree, df1=df_degree, df2=df_resid, lower.tail=FALSE)
+
+print(paste0("df_degree: ", df_degree))
+print(paste0("df_resid: ", df_resid))
+print(paste0("df_total: ", df_total))
+
+print(paste0("sum_sq_degree: ", sum_sq_degree))
+print(paste0("sum_sq_resid: ", sum_sq_resid))
+print(paste0("sum_sq_total: ", sum_sq_total))
+
+print(paste0("mean_sq_degree: ", mean_sq_degree))
+print(paste0("mean_sq_resid: ", mean_sq_resid))
+print(paste0("f_value_degree: ", f_value_degree))
+
+print(paste0("f_pr_value: ", f_pr_value))
+
+```
+### Part D
+
+**What is the conclusion of the test?**
+
+Since the p-value is greater than 0.05, we fail to reject the null hypothesis. The average number of hours worked does not vary by educational attainment. Note - since the p-value is only slightly above the critical value, we fail to reject with caution.
