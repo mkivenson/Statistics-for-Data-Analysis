@@ -124,7 +124,7 @@ table(dogs$borough)
 
 
 #### Dog Breed by Borough
-This next chart summarizes the most common dog breeds and how many of them live in each borough. Havanese dogs are an interesting subset - 1188 Havanese dogs are registered in Manhattan but only 90 in the Bronx. I own two pitbulls in Brooklyn, so it's interesting to see that pitbulls are most common in Brooklyn. 
+This next chart summarizes the most common dog breeds and how many of them live in each borough. Havanese dogs are an interesting subset, with 1188 Havanese dogs registered in Manhattan but only 90 in the Bronx.
 
 ```{r type-borough}
 common_dogs <- dogs %>%
