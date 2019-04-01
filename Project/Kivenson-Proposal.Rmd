@@ -1,0 +1,173 @@
+---
+title: "Kivenson-Proposal"
+author: "Mary Anna Kivenson"
+date: "3/31/2019"
+output:
+  html_document:
+    highlight: pygments
+    theme: united
+  pdf_document: default
+---
+
+### Data Preparation
+
+```{r setup, echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+library(tidyverse)
+library(magrittr)
+library(ggplot2)
+library(DT)
+library(RSocrata)
+
+# load data
+token <- "ew2rEMuESuzWPqMkyPfOSGJgE"
+dogs <- read.socrata("https://data.cityofnewyork.us/resource/nu7n-tubp.csv", app_token = token)
+
+# find the age in days of each dog based on the date that the dataset was last updated (September 09 2018)
+dogs$animalbirth <- as.Date(strptime(dogs$animalbirth, format = "%Y-%m-%d")) 
+data_updated <- as.Date(strptime('2018-09-10', format = "%Y-%m-%d")) 
+dogs$age_days <- as.vector(data_updated - dogs$animalbirth)
+
+# change text columns to lowercase
+dogs$animalgender<- sapply(dogs$animalgender, tolower) 
+dogs$animalname <- sapply(dogs$animalname, tolower)
+dogs$borough <- sapply(dogs$borough, tolower)
+dogs$breedname <- sapply(dogs$breedname, tolower)
+
+#column value cleanup
+dogs$borough <- gsub('staten is(?!land)','staten island',dogs$borough, perl = TRUE)
+dogs$borough <- gsub('new york','manhattan',dogs$borough, perl = TRUE)
+dogs$breedname <- gsub('(american pit bull mix / pit bull mix)|(american pit bull terrier/pit bull)','pitbull',dogs$breedname)
+dogs$breedname <- gsub(' crossbreed|(,.+)','',dogs$breedname)
+
+# subset the data to only keep columns of interest and values with a minimum amount of occurances
+dogs %<>%
+  select(animalgender, animalname, animalbirth, borough, age_days, breedname, zipcode) %>%
+  group_by(breedname) %>%   #filter to exclude uncommon dogs
+  filter(n()>100) %>% 
+  group_by(borough) %>%   #filter to exclude outer boroughs
+  filter(n()>20) %>%  
+  group_by(zipcode) %>%
+  filter(n()>20) %>%
+  filter(breedname != 'unknown')
+```
+
+
+### Research question 
+
+**You should phrase your research question in a way that matches up with the scope of inference your dataset allows for.**
+
+Question 1: In New York City, are certain dog breeds more common than others in certain boroughs or zip codes? 
+
+Question 2: In New York City, does average age differ between different dog breeds? 
+
+### Cases 
+
+**What are the cases, and how many are there?**
+
+Each case is a unique New York City dog license that was active in 2016. There are 101,611 active dog licenses in New York City in 2016 for known dog breeds with at least 100 registered dogs. 
+
+```{r nrow}
+nrow(dogs)
+```
+
+### Data collection 
+
+**Describe the method of data collection.**
+
+The data is collected through the Department of Health and Mental Hygiene Dog Licensing System. 
+
+### Type of study 
+
+**What type of study is this (observational/experiment)?**
+
+This data set is observational. 
+
+
+### Data Source 
+
+**If you collected the data, state self-collected. If not, provide a citation/link.**
+
+The source for this data is the NYC Open Data [Dog Licensing Dataset](https://data.cityofnewyork.us/Health/NYC-Dog-Licensing-Dataset/nu7n-tubp).
+
+
+### Response Variable
+
+**What is the response variable, and what type is it (numerical/categorical)?**
+
+Question 1: The response variable is dog breed, and it is a catergorial variable.
+
+Question 2: The response variable is dog age, and it is a numerical variable. 
+
+### Explanatory Variable
+
+**Explanatory: What is the explanatory variable(s), and what type is it (numerical/categorical)?**
+
+Question 1: The explanatory variable is location (Borough and Zip Code, both categorical).
+
+Question 2: The explanatory variable is dog breed (categorical).
+
+### Relevant summary statistics 
+
+**Provide summary statistics for each the variables. Also include appropriate visualizations related to your research question (e.g. scatter plot, boxplots, etc). This step requires the use of R, hence a code chunk is provided below. Insert more code chunks as needed.**
+
+First, we can look at a preview of what our data looks like:
+```{r preview}
+datatable(head(dogs))
+```
+
+
+#### Amount of Dog Licences per Borough  
+The following summary table shows the quantity of dogs in each borough.   
+```{r dog-borough}
+table(dogs$borough)
+```
+
+
+#### Dog Breed by Borough
+This next chart summarizes the most common dog breeds and how many of them live in each borough. Havanese dogs are an interesting subset - 1188 Havanese dogs are registered in Manhattan but only 90 in the Bronx. I own two pitbulls in Brooklyn, so it's interesting to see that pitbulls are most common in Brooklyn. 
+
+```{r type-borough}
+common_dogs <- dogs %>%
+  group_by(breedname) %>% 
+  filter(n()>2000) 
+
+table(common_dogs$breedname, common_dogs$borough)
+
+ggplot(common_dogs, aes(breedname)) + geom_bar(aes(fill=breedname)) + facet_grid(.~borough) + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank())
+```
+
+
+#### Most Common Dog Breed by Borough
+
+The table below shows the most common dog breed within each borough. Yorkshire Terriers and Labrador Retrievers are clearly the most common.
+```{r common-borough}
+mostrepeated <- function(x) as(names(which.max(table(x))), mode(x)) 
+datatable(as.data.frame(tapply(dogs$breedname, dogs$borough, FUN = mostrepeated)))
+```
+
+
+#### Most Common Dog Breed by Zipcode
+
+Looking at the most common dog breed by zip code yields more diverse results. 
+
+```{r common-zip}
+datatable(as.data.frame(tapply(dogs$breedname, dogs$zipcode, FUN = mostrepeated)))
+```
+
+
+#### Average Age by Dog Breed
+
+The following chart shows a boxplot of the average dog age in days by dog breed. It is interesting to note that there are a lot of outliers for pitbulls. 
+
+```{r age-breed}
+ggplot(common_dogs, aes(breedname, age_days)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+#### Average Age by Borough
+
+The following chart shows a boxplot of the average dog age in days by borough - it seems like Staten Island may have the oldest dogs. 
+
+```{r age-borough}
+ggplot(common_dogs, aes(borough, age_days)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
