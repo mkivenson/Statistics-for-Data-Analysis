@@ -1,5 +1,5 @@
 ---
-title: "DATA 606 Question 4.13"
+title: "DATA 606 Question 4.23"
 author: "Mary Anna Kivenson"
 date: "3/10/2019"
 output:
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(openintro)
 ```
 
-## 4.23 Nutrition labels.  
+### 4.23 Nutrition labels. {.tabset .tabset-fade} 
 The nutrition label on a bag of potato chips says that a one ounce
 (28 gram) serving of potato chips has 130 calories and contains ten grams of fat, with three grams
 of saturated fat. A random sample of 35 bags yielded a sample mean of 134 calories with a standard
@@ -67,3 +67,4 @@ print(paste0("The p-value is ", pvalue))
 
 Since $p = 0.1645 > \alpha = 0.05$, we fail to reject the null hypothesis. There is not enough evidence to suggest that the nutrition label on potato chip bags does not provide an accurate measure of calories.  
 
+###
