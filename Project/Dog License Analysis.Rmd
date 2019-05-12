@@ -1,0 +1,240 @@
+---
+title: "Dogs in New York City"
+author: "Mary Anna Kivenson"
+date: "5/11/2019"
+output:
+  html_document:
+    highlight: pygments
+    theme: united
+    toc: true
+    toc_float: true
+---
+
+
+
+## Introduction
+
+*In New York City, are certain dog breeds more common than others by zip code?*
+
+Knowing which dogs breeds are most prevalent in each subsection of the city could help with targeted adoption strategies. For example, animal shelters can host breed-specific adoption events in zip codes that are more inclined to adopting a certain dog breed. Knowing which zip codes favor dog breeds that are unlikely to be found in shelters will also help shelters either promote adoption in those areas, or focus their efforts elsewhere.
+
+The following libraries have been used in this project for data cleaning, visualization, and statistical tests.
+
+```{r packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(magrittr)
+library(ggplot2)
+library(DT)
+library(RSocrata)
+library(ggplot2)
+library(choroplethr)
+library(choroplethrZip)
+library(data.table)
+library(gplots)
+library(rvest)
+library(stringr)
+library(statsr)
+```
+
+## Data
+
+**Data collection**: The source for this data is the NYC Open Data [Dog Licensing Dataset](https://data.cityofnewyork.us/Health/NYC-Dog-Licensing-Dataset/nu7n-tubp). The data is using the amount of active dog licenses in 2016, collected through the Department of Health and Mental Hygiene Dog Licensing System.
+
+**Cases**: The cases are unique dog licenses that were active during the year 2016. 
+
+**Variables**: I will be studying dog breed and zip code, both of which are categorical variables. 
+
+**Type of study**: This is an observational study, including all dogs licensed in NYC during 2016.
+
+**Scope of inference - generalizability**: The population of interest is dogs with active licenses in 2016, and this analysis can be generalized to the population of all dogs in NYC (licensed and unlicensed). The majority of dogs in NYC (80%) are unlicensed, and we will assume that a random sample of licensed NYC dogs are an accurate representation of all NYC dogs. Although the analysis should be able to be generalized to the population, there are a few concerns:
+
+- Dog licenses must be renewed annually to remain active, so the sample may underrepresent the amount of older dogs in NYC
+- Shelters register a dog license to everyone who adopts a dog - this may not be the case for other methods of obtaining a dog
+
+**Scope of inference - causality**: Since this is an observational study, it would be challenging to establish causality between zip code and dog breed. 
+
+
+## Exploratory Data Analysis
+
+To perform exploratory data analysis, we first obtain and clean the dog license dataset.
+
+### Data Preparation
+
+The following steps were taken to tidy the data:
+
+- Use a token to extract dog licensing data from socrata
+- Add a column showing the age of each dog based on the date that the dataset was last updated (September 09 2018)
+- Change all text columns to lowercase to help with text analysis
+- Standardize dog breeds (for example, merge "german shepherd dog" and "german shepherd")
+- Standardize boroughs (for example, "staten is" and "staten island" need to be combined)
+- Subset the data to exclude uncommon dog breeds and zip codes with limited information
+
+```{r cleanup, echo=TRUE, warning=FALSE, message=FALSE}
+# load data
+token <- "ew2rEMuESuzWPqMkyPfOSGJgE"
+dogs <- read.socrata("https://data.cityofnewyork.us/resource/nu7n-tubp.csv", app_token = token)
+
+
+dogs$animalbirth <- as.Date(strptime(dogs$animalbirth, format = "%Y-%m-%d")) 
+data_updated <- as.Date(strptime('2018-09-10', format = "%Y-%m-%d")) 
+dogs$age_days <- as.vector(data_updated - dogs$animalbirth)
+
+
+# change text columns to lowercase
+dogs$animalgender<- sapply(dogs$animalgender, tolower) 
+dogs$animalname <- sapply(dogs$animalname, tolower)
+dogs$borough <- sapply(dogs$borough, tolower)
+dogs$breedname <- sapply(dogs$breedname, tolower)
+
+# column value cleanup
+dogs$borough <- gsub('staten is(?!land)','staten island',dogs$borough, perl = TRUE)
+dogs$borough <- gsub('new york','manhattan',dogs$borough, perl = TRUE)
+dogs$breedname <- gsub('(american pit bull mix / pit bull mix)|(american pit bull terrier/pit bull)','pitbull',dogs$breedname)
+dogs$breedname <- gsub(' crossbreed|(,.+)','',dogs$breedname)
+dogs$breedname <- gsub('german shepherd dog','german shepherd',dogs$breedname)
+dogs$breedname <- gsub('german shepherd dog','german shepherd',dogs$breedname)
+
+# subset the data
+dogs %<>%
+  select(animalgender, animalname, animalbirth, borough, age_days, breedname, zipcode) %>%
+  group_by(breedname) %>%   #filter to exclude uncommon dogs
+  filter(n()>2000) %>% 
+  group_by(borough) %>%   #filter to exclude outer boroughs
+  filter(n()>20) %>%  
+  group_by(zipcode) %>%
+  filter(n()>20) %>%
+  filter(breedname != 'unknown')
+
+datatable(dogs)
+```
+
+#### Amount of Dog Licences per Borough  
+The following summary table shows the quantity of dogs in each borough.  
+
+```{r dog-borough, message=FALSE, warning=FALSE}
+balloonplot(t(table(dogs$breedname,dogs$borough)), main ="Dog Breeds by Borough", xlab ="", ylab="",
+            label = FALSE, show.margins = FALSE)
+```
+
+
+
+#### Most Common Dog Breed by Zipcode
+
+For a more detailed glimpse at dog breeds by location, the table below shows the most common dog breed within each zipcode.
+
+```{r common-zip, message=FALSE, warning=FALSE}
+mostrepeated <- function(x) as(names(which.max(table(x))), mode(x)) 
+common_zip <- setDT(as.data.frame(tapply(dogs$breedname, dogs$zipcode, FUN = mostrepeated)), keep.rownames = "region")[] %>% rename("value" = "tapply(dogs$breedname, dogs$zipcode, FUN = mostrepeated)")
+nyc_fips = c(36005, 36047, 36061, 36081, 36085)
+
+zip_choropleth(common_zip,
+               county_zoom = nyc_fips,
+               num_colors = 8,
+               legend="Breed Name",
+               title="Most Popular Dog Breed by Zip Code") +
+  scale_fill_brewer(palette="Set3") 
+  
+```
+
+
+
+## Inference
+
+If your data fails some conditions and you can’t use a theoretical method, then you should use simulation. If you can use both methods, then you should use both methods. It is your responsibility to figure out the appropriate methodology.
+
+### Chi-square Test
+
+In order to evaluate if there is an association between borough of residence and preferred dog breed, we will perform a chi-square test for two-way tables. 
+
+#### Hypothesis Test
+
+$H_0$: There is no association between borough of residence and preferred dog breed
+
+$H_1$: There is an association between borough of residence and preferred dog breed.
+
+#### Check Conditions
+
+- The variable under study is categorical.
+
+**This condition is met, since dog breed is a categorical variable.**
+
+- The expected value of the number of sample observations in each level of the variable is at least 5.
+
+**This condition is met, all boroughs have more than 5 licenses for each dog breed.**
+
+```{r freqtable}
+table(dogs$breedname,dogs$borough)
+```
+
+- The sampling method is simple random sampling.
+
+**This condition is NOT met - the sample was obtained from dogs that had active licenses in 2016. Instead, we will perform simulation based inference.**
+
+#### Simulation Based Inference
+
+We perform a simulation based hypothesis test below to test if borough and breedname are independent, using the proportion statistic. The outcome of the simulationreturns a p-value of 0, so we reject the null hypothesis in favor of the alternative hypothesis. 
+
+$H_1$: There is an association between borough of residence and preferred dog breed.
+ 
+```{r inference}
+inference(breedname, borough, data = dogs, type = "ht", statistic = "proportion", method = "theoretical")
+```
+
+
+
+## Conclusion
+
+Write a brief summary of your findings without repeating your statements from earlier. Also include a discussion of what you have learned about your research question and the data you collected. You may also want to include ideas for possible future research.
+
+I was able to find that the breeds of dogs vary greatly by borough, confirmed by a simulation-based hypothesis test. In the future, it would be interesting to perform a chi-square test on a dataset that is randomly sampled and therefore meets conditions for inference. 
+
+This data has also allowed me to create visualizations about other metrics, such as most common dog names and average age of dogs.  
+
+#### Most Common Dog Names by Gender
+
+```{r namesbygender, message=FALSE, warning=FALSE}
+require("ggrepel")
+dogs %>%
+  group_by(animalgender, animalname) %>%
+  filter(animalname != "name not provided") %>%
+  filter(animalname != "unknown") %>%
+  filter(animalgender %in% c("f","m")) %>%
+  summarise(count_name = n()) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  ggplot(aes(animalgender, count_name)) + geom_label_repel(aes(label = animalname, color = animalgender, size = count_name)) + theme(legend.position="none") + facet_wrap(~animalgender, scales = "free") + theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+
+
+#### Most Common Dog Names by Gender
+
+```{r namesbybreed, message=FALSE, warning=FALSE}
+require("ggrepel")
+dogs %>%
+  group_by(breedname, animalname) %>%
+  filter(animalname != "name not provided") %>%
+  filter(animalname != "unknown") %>%
+  summarise(count_name = n()) %>%
+  top_n(5) %>%
+  ungroup() %>%
+  ggplot(aes(breedname, count_name)) + geom_label_repel(aes(label = animalname, color = breedname)) + theme(legend.position="none") + facet_wrap(~breedname, scales = "free") + theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+
+#### Average Dog Age by Breed
+
+Looking at average age of each dog breed gives some interesting insights. There is a large range between jack russel terrier with an average age of 3326 days (or 9 years) and pitbulls with an average age of 2391 days (6.5 years).
+
+```{r agebybreed, message=FALSE, warning=FALSE}
+dogs %>%
+  group_by(breedname) %>%
+  summarise(average_age = mean(age_days))
+```
+
+
+All in all, this dataset has many variables to consider but fails to meet all the necessary conditions for most statistical inferences. 
